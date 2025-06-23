@@ -1,47 +1,27 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 const app = express();
 const PORT = 4000;
 
 app.use(cors());
 app.use(express.json());
 
-// Моковые данные (пример структуры)
-const data = [
-  {
-    name: "Деревообработка",
-    subcategories: [
-      {
-        name: "Пилорамы и столярные мастерские",
-        plans: [
-          { title: "Бизнес-план пилорамы", desc: "Бизнес-план по открытию пилорамы с расчетами, оборудованием и анализом рынка." },
-          { title: "Бизнес-план столярной мастерской", desc: "Проект по запуску столярной мастерской для производства мебели и изделий из дерева." }
-        ]
-      },
-      {
-        name: "Производство изделий из бумаги",
-        plans: [
-          { title: "Бизнес план по производству бумажной тары и упаковки", desc: "Ассортимент продукции: крафт мешки, бумажные пакеты, упаковка с ламинированием и без." }
-        ]
-      }
-    ]
-  },
-  {
-    name: "Автобизнес",
-    subcategories: [
-      {
-        name: "Автомойки",
-        plans: [
-          { title: "Бизнес-план автомойки", desc: "Открытие автомойки самообслуживания с расчетом затрат и прибыли." }
-        ]
-      }
-    ]
+// Чтение данных из result.json
+function getData() {
+  const filePath = path.join(__dirname, 'result.json');
+  try {
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
   }
-];
+}
 
 // Эндпоинт для получения всех категорий с подкатегориями и планами
 app.get('/api/categories', (req, res) => {
-  res.json(data);
+  res.json(getData());
 });
 
 app.listen(PORT, () => {
