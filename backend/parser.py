@@ -25,14 +25,8 @@ def get_soup(url):
         print(f'  [!] Ошибка при запросе {url}: {e}')
         return None
 
-# Рекурсивный парсинг: если есть планы — собираем, если есть подкатегории — идём глубже
-def parse_node(url, level=0):
-    time.sleep(1)
-    soup = get_soup(url)
-    if not soup:
-        return {}
+def extract_plans(soup):
     plans = []
-    # 1. Парсим .bp-card (старый вариант)
     for card in soup.select('.bp-card'):
         title = card.select_one('.bp-card__title')
         desc = card.select_one('.bp-card__text')
@@ -43,15 +37,11 @@ def parse_node(url, level=0):
         if file_url and not file_url.startswith('http'):
             file_url = BASE_URL.rstrip('/') + '/' + file_url.lstrip('/')
         plans.append({'title': title, 'desc': desc, 'file_url': file_url})
-    # 2. Парсим article.w-grid-item.post (новый вариант)
     for card in soup.select('article.w-grid-item.post'):
-        # Заголовок
         title_tag = card.select_one('h2, .entry-title, a')
         title = title_tag.get_text(strip=True) if title_tag else ''
-        # Описание
         desc_tag = card.select_one('.w-hwrapper, .entry-content, p')
         desc = remove_contacts(desc_tag.get_text(strip=True)) if desc_tag else ''
-        # Ссылка на скачивание (ищем первую ссылку)
         file_url = None
         for a in card.select('a'):
             href = a.get('href')
@@ -61,10 +51,19 @@ def parse_node(url, level=0):
         if file_url and not file_url.startswith('http'):
             file_url = BASE_URL.rstrip('/') + '/' + file_url.lstrip('/')
         plans.append({'title': title, 'desc': desc, 'file_url': file_url})
+    return plans
+
+# Рекурсивный парсинг: если есть планы — собираем, если есть подкатегории — идём глубже
+def parse_node(url, level=0):
+    time.sleep(1)
+    soup = get_soup(url)
+    if not soup:
+        return {}
+    # 1. Сначала ищем планы без подкатегорий (прямо на странице)
+    plans = extract_plans(soup)
     if plans:
-        print('  ' * level + f'  [Планов найдено: {len(plans)}]')
-        return {'plans': plans}
-    # Если нет планов, ищем подкатегории
+        print('  ' * level + f'  [Планов без подкатегории: {len(plans)}]')
+    # 2. Затем ищем подкатегории
     subcats = []
     for sub in soup.select('.w-grid-item.type_term.ratio_16x9'):
         a = sub.find('a')
@@ -76,15 +75,20 @@ def parse_node(url, level=0):
             link = BASE_URL.rstrip('/') + '/' + link.lstrip('/')
         print('  ' * (level+1) + f'Подкатегория: {name}')
         node = parse_node(link, level+1)
+        subcat_obj = {'name': name}
+        if node.get('subcategories'):
+            subcat_obj['subcategories'] = node['subcategories']
         if node.get('plans'):
-            subcats.append({'name': name, 'plans': node['plans']})
-        elif node.get('subcategories'):
-            subcats.append({'name': name, 'subcategories': node['subcategories']})
-        else:
-            subcats.append({'name': name, 'plans': []})
+            subcat_obj['plans'] = node['plans']
+        subcats.append(subcat_obj)
+    result = {}
     if subcats:
-        return {'subcategories': subcats}
-    return {'plans': []}
+        result['subcategories'] = subcats
+    if plans:
+        result['plans'] = plans
+    if not subcats and not plans:
+        result['plans'] = []
+    return result
 
 if __name__ == '__main__':
     result = []
@@ -101,10 +105,10 @@ if __name__ == '__main__':
             print(f'Категория: {name}')
             node = parse_node(link, 1)
             cat_obj = {'name': name}
-            if node.get('plans'):
-                cat_obj['plans'] = node['plans']
             if node.get('subcategories'):
                 cat_obj['subcategories'] = node['subcategories']
+            if node.get('plans'):
+                cat_obj['plans'] = node['plans']
             result.append(cat_obj)
     except Exception as e:
         print('Ошибка при парсинге:', e)

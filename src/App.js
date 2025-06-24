@@ -40,49 +40,16 @@ function App() {
   for (const idx of stack) {
     if (!current.list || !current.list[idx]) break;
     const item = current.list[idx];
-    if (item.subcategories) {
-      current = { list: item.subcategories, title: item.name };
-    } else if (item.plans) {
-      current = { plans: item.plans, title: item.name };
-    } else {
-      current = { list: [], title: item.name };
-    }
+    current = {
+      list: item.subcategories || [],
+      plans: item.plans || [],
+      title: item.name
+    };
   }
 
   // Навигация назад
   const goBack = () => setStack(stack.slice(0, -1));
 
-  // Если на текущем уровне есть планы — показываем их
-  if (current.plans) {
-    return (
-      <div className="main-wrapper">
-        <header className="header">
-          <div className="logo" style={{ cursor: "pointer" }} onClick={stack.length ? goBack : undefined}>
-            АГРЕГАТОР<br />БИЗНЕС-ПЛАНОВ
-          </div>
-          <button className="plans-btn">Ещё 1 044 бизнес-плана</button>
-        </header>
-        <section className="hero">
-          <h1>Примеры бизнес планов: {current.title}</h1>
-        </section>
-        <section className="plans-list">
-          {current.plans.length === 0 && <div className="empty">Нет бизнес-планов в этой категории</div>}
-          {current.plans.map((plan, idx) => (
-            <div className="plan-card" key={idx}>
-              <div className="plan-title">{plan.title}</div>
-              <div className="plan-desc">{plan.desc}</div>
-              <div className="plan-actions">
-                {plan.file_url && <a className="download-btn" href={plan.file_url} target="_blank" rel="noopener noreferrer">Скачать бизнес-план</a>}
-                <button className="custom-btn">Нужен БП под ваш проект</button>
-              </div>
-            </div>
-          ))}
-        </section>
-      </div>
-    );
-  }
-
-  // Если есть список (категории/подкатегории)
   return (
     <div className="main-wrapper">
       <header className="header">
@@ -94,20 +61,34 @@ function App() {
       <section className="hero">
         <h1>{current.title}</h1>
       </section>
-      <section className="categories">
-        <div className="categories-grid">
-          {current.list && current.list.length === 0 && <div className="empty">Нет данных</div>}
-          {current.list && current.list.map((item, idx) => (
-            <div
-              className="category-card"
-              key={idx}
-              onClick={() => setStack([...stack, idx])}
-            >
-              <div className="category-icon">{ICONS[item.name] || <FaIndustry />}</div>
-              <div className="category-name">{item.name}</div>
+      {current.list && current.list.length > 0 && (
+        <section className="categories">
+          <div className="categories-grid">
+            {current.list.map((item, idx) => (
+              <div
+                className="category-card"
+                key={idx}
+                onClick={() => setStack([...stack, idx])}
+              >
+                <div className="category-icon">{ICONS[item.name] || <FaIndustry />}</div>
+                <div className="category-name">{item.name}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      <section className="plans-list">
+        {(!current.plans || current.plans.length === 0) && <div className="empty">Нет бизнес-планов в этой категории</div>}
+        {current.plans && current.plans.map((plan, idx) => (
+          <div className="plan-card" key={idx}>
+            <div className="plan-title">{plan.title}</div>
+            <div className="plan-desc">{plan.desc}</div>
+            <div className="plan-actions">
+              {plan.file_url && <a className="download-btn" href={plan.file_url} target="_blank" rel="noopener noreferrer">Скачать бизнес-план</a>}
+              <button className="custom-btn">Нужен БП под ваш проект</button>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </section>
     </div>
   );
