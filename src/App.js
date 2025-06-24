@@ -1,11 +1,41 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { FaCar, FaHotel, FaLaptop, FaIndustry, FaRecycle, FaGamepad, FaInfoCircle, FaDumbbell, FaShoppingCart, FaTools, FaHome, FaPaintRoller } from "react-icons/fa";
+import { FaBriefcase, FaChartBar, FaLaptop, FaTools, FaBuilding, FaUserTie, FaStore, FaUtensils, FaCar, FaIndustry, FaClinicMedical, FaGraduationCap, FaRecycle, FaDumbbell, FaPrint, FaHome, FaCogs, FaBoxOpen, FaUserFriends, FaLeaf, FaShippingFast, FaBook, FaSeedling, FaInfoCircle } from "react-icons/fa";
 
 const ICONS = {
-  "Автобизнес": <FaCar />,
-  "Деревообработка": <FaIndustry />,
-  // ...добавьте иконки для других категорий по желанию
+  "Автобизнес": <FaCar style={{color: '#181818'}} />,
+  "Деревообработка": <FaIndustry style={{color: '#181818'}} />,
+  "Гостиничный бизнес": <FaBuilding style={{color: '#181818'}} />,
+  "Компьютерный бизнес": <FaLaptop style={{color: '#181818'}} />,
+  "Мусоропереработка": <FaRecycle style={{color: '#181818'}} />,
+  "Отдых и развлечения": <FaChartBar style={{color: '#181818'}} />,
+  "Прочее": <FaInfoCircle style={{color: '#181818'}} />,
+  "Спорт": <FaDumbbell style={{color: '#181818'}} />,
+  "Торговля": <FaStore style={{color: '#181818'}} />,
+  "Строительство": <FaTools style={{color: '#181818'}} />,
+  "Коттеджные посёлки": <FaHome style={{color: '#181818'}} />,
+  "Ремонт и отделочные услуги": <FaTools style={{color: '#181818'}} />,
+  "Медицина": <FaClinicMedical style={{color: '#181818'}} />,
+  "Сельское хозяйство": <FaSeedling style={{color: '#181818'}} />,
+  "Образование": <FaGraduationCap style={{color: '#181818'}} />,
+  "Общепит": <FaUtensils style={{color: '#181818'}} />,
+  "Консалтинг": <FaUserTie style={{color: '#181818'}} />,
+  "Логистические центры": <FaShippingFast style={{color: '#181818'}} />,
+  "Магазины автозапчастей": <FaStore style={{color: '#181818'}} />,
+  "Типографии": <FaPrint style={{color: '#181818'}} />,
+  "Металлообработка": <FaCogs style={{color: '#181818'}} />,
+  "Производство продуктов питания": <FaBoxOpen style={{color: '#181818'}} />,
+  "Салоны красоты": <FaUserFriends style={{color: '#181818'}} />,
+  "Бытовые услуги": <FaUserFriends style={{color: '#181818'}} />,
+  "Добыча полезных ископаемых": <FaLeaf style={{color: '#181818'}} />,
+  "Производство стройматериалов": <FaBuilding style={{color: '#181818'}} />,
+  "Машиностроение": <FaIndustry style={{color: '#181818'}} />,
+  "Финансы": <FaChartBar style={{color: '#181818'}} />,
+  "Книги": <FaBook style={{color: '#181818'}} />,
+  "Аптеки": <FaClinicMedical style={{color: '#181818'}} />,
+  "Арендный бизнес": <FaHome style={{color: '#181818'}} />,
+  "Производство пеллет и брикетов": <FaSeedling style={{color: '#181818'}} />
+  // ...можно добавить ещё по желанию
 };
 
 function App() {
@@ -49,6 +79,8 @@ function App() {
 
   // Навигация назад
   const goBack = () => setStack(stack.slice(0, -1));
+  const goHome = () => setStack([]);
+  const isRoot = stack.length === 0;
 
   return (
     <div className="main-wrapper">
@@ -56,7 +88,7 @@ function App() {
         <div className="logo" style={{ cursor: stack.length ? "pointer" : undefined }} onClick={stack.length ? goBack : undefined}>
           АГРЕГАТОР<br />БИЗНЕС-ПЛАНОВ
         </div>
-        <button className="plans-btn">Ещё 1 044 бизнес-плана</button>
+        <button className="plans-btn" onClick={goHome}>Ещё 1 044 бизнес-плана</button>
       </header>
       <section className="hero">
         <h1>{current.title}</h1>
@@ -70,7 +102,7 @@ function App() {
                 key={idx}
                 onClick={() => setStack([...stack, idx])}
               >
-                <div className="category-icon">{ICONS[item.name] || <FaIndustry />}</div>
+                <div className="category-icon">{ICONS[item.name] || <FaBriefcase style={{color: '#181818'}} />}</div>
                 <div className="category-name">{item.name}</div>
               </div>
             ))}
@@ -78,7 +110,7 @@ function App() {
         </section>
       )}
       <section className="plans-list">
-        {(!current.plans || current.plans.length === 0) && <div className="empty">Нет бизнес-планов в этой категории</div>}
+        {!isRoot && (!current.plans || current.plans.length === 0) && <div className="empty">Нет бизнес-планов в этой категории</div>}
         {current.plans && current.plans.map((plan, idx) => (
           <div className="plan-card" key={idx}>
             <div className="plan-title">{plan.title}</div>
