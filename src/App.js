@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { FaBriefcase, FaChartBar, FaLaptop, FaTools, FaBuilding, FaUserTie, FaStore, FaUtensils, FaCar, FaIndustry, FaClinicMedical, FaGraduationCap, FaRecycle, FaDumbbell, FaPrint, FaHome, FaCogs, FaBoxOpen, FaUserFriends, FaLeaf, FaShippingFast, FaBook, FaSeedling, FaInfoCircle } from "react-icons/fa";
+import { FaBriefcase, FaChartBar, FaLaptop, FaTools, FaBuilding, FaUserTie, FaStore, FaUtensils, FaCar, FaIndustry, FaClinicMedical, FaGraduationCap, FaRecycle, FaDumbbell, FaPrint, FaHome, FaCogs, FaBoxOpen, FaUserFriends, FaLeaf, FaShippingFast, FaBook, FaSeedling, FaInfoCircle, FaTimes } from "react-icons/fa";
 
 const ICONS = {
   "Автобизнес": <FaCar style={{color: '#181818'}} />,
@@ -38,11 +38,50 @@ const ICONS = {
   // ...можно добавить ещё по желанию
 };
 
+function Modal({ open, onClose, onSubmit }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setName(""); setPhone(""); setMessage(""); setSent(false);
+    }
+  }, [open]);
+
+  if (!open) return null;
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}><FaTimes /></button>
+        <h2 className="modal-title">Заполните форму связи</h2>
+        {sent ? (
+          <div className="modal-success">Спасибо! Мы свяжемся с вами в течение 5 минут.</div>
+        ) : (
+          <form className="modal-form" onSubmit={e => {e.preventDefault(); setSent(true); onSubmit && onSubmit({name, phone, message});}}>
+            <div className="modal-label">Свяжемся с Вами в течение 5 минут</div>
+            <input className="modal-input" type="text" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} required />
+            <input className="modal-input" type="tel" placeholder="Номер телефона" value={phone} onChange={e => setPhone(e.target.value)} required />
+            <textarea className="modal-input" placeholder="Сообщение" value={message} onChange={e => setMessage(e.target.value)} rows={3} />
+            <button className="modal-submit" type="submit">ОТПРАВИТЬ</button>
+            <div className="modal-policy">
+              Отправляя сообщение я даю <a href="#" target="_blank" rel="noopener noreferrer">Согласие</a> на обработку персональных данных.<br />
+              С условиями <a href="#" target="_blank" rel="noopener noreferrer">Политики в отношении обработки персональных данных</a> ознакомлен.
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stack, setStack] = useState([]); // стек выбранных уровней
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -117,11 +156,12 @@ function App() {
             <div className="plan-desc">{plan.desc}</div>
             <div className="plan-actions">
               {plan.file_url && <a className="download-btn" href={plan.file_url} target="_blank" rel="noopener noreferrer">Скачать бизнес-план</a>}
-              <button className="custom-btn">Нужен БП под ваш проект</button>
+              <button className="custom-btn" onClick={() => setModalOpen(true)}>Нужен БП под ваш проект</button>
             </div>
           </div>
         ))}
       </section>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   );
 }
